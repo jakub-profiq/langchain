@@ -12,12 +12,15 @@ from langchain.tools.playwright.base import (
     lazy_import_playwright_browsers,
 )
 from langchain.tools.playwright.click import ClickTool
+from langchain.tools.playwright.click_by_text import ClickByTextTool
 from langchain.tools.playwright.current_page import CurrentWebPageTool
 from langchain.tools.playwright.extract_hyperlinks import ExtractHyperlinksTool
 from langchain.tools.playwright.extract_text import ExtractTextTool
+from langchain.tools.playwright.fill import FillTool
 from langchain.tools.playwright.get_elements import GetElementsTool
 from langchain.tools.playwright.navigate import NavigateTool
 from langchain.tools.playwright.navigate_back import NavigateBackTool
+from langchain.tools.playwright.take_screenshot import TakeScreenshotTool
 
 if TYPE_CHECKING:
     from playwright.async_api import Browser as AsyncBrowser
@@ -55,12 +58,15 @@ class PlayWrightBrowserToolkit(BaseToolkit):
         """Get the tools in the toolkit."""
         tool_classes: List[Type[BaseBrowserTool]] = [
             ClickTool,
+            ClickByTextTool,
             NavigateTool,
             NavigateBackTool,
             ExtractTextTool,
             ExtractHyperlinksTool,
+            FillTool,
             GetElementsTool,
             CurrentWebPageTool,
+            TakeScreenshotTool,
         ]
 
         tools = [

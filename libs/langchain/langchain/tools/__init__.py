@@ -49,12 +49,15 @@ from langchain.tools.openapi.utils.openapi_utils import OpenAPISpec
 from langchain.tools.openweathermap.tool import OpenWeatherMapQueryRun
 from langchain.tools.playwright import (
     ClickTool,
+    ClickByTextTool,
     CurrentWebPageTool,
     ExtractHyperlinksTool,
     ExtractTextTool,
+    FillTool,
     GetElementsTool,
     NavigateBackTool,
     NavigateTool,
+    TakeScreenshotTool,
 )
 from langchain.tools.plugin import AIPluginTool
 from langchain.tools.powerbi.tool import (
@@ -118,6 +121,7 @@ __all__ = [
     "BingSearchResults",
     "BingSearchRun",
     "BraveSearch",
+    "ClickByTextTool",
     "ClickTool",
     "CopyFileTool",
     "CurrentWebPageTool",
@@ -127,6 +131,7 @@ __all__ = [
     "ExtractHyperlinksTool",
     "ExtractTextTool",
     "FileSearchTool",
+    "FillTool"
     "GetElementsTool",
     "GmailCreateDraft",
     "GmailGetMessage",
@@ -184,6 +189,7 @@ __all__ = [
     "StdInInquireTool",
     "SteamshipImageGenerationTool",
     "StructuredTool",
+    "TakeScreenshotTool",
     "Tool",
     "VectorStoreQATool",
     "VectorStoreQAWithSourcesTool",
