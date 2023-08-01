@@ -39,6 +39,12 @@ class NavigateTool(BaseBrowserTool):
         page = get_current_page(self.sync_browser)
         response = page.goto(url)
         status = response.status if response else "unknown"
+
+        # write playwright command to temp file
+        playwright_cmd = f"    page.goto('{url}');\n"
+        with open('tempfile', 'a') as f:
+            f.write(playwright_cmd)
+
         return f"Navigating to {url} returned status code {status}"
 
     async def _arun(
@@ -54,9 +60,8 @@ class NavigateTool(BaseBrowserTool):
         status = response.status if response else "unknown"
 
         # write playwright command to temp file
-        playwright_cmd = f"await page.goto('{url}');\n"
+        playwright_cmd = f"    await page.goto('{url}');\n"
         with open('tempfile', 'a') as f:
-            f.write('    ')
             f.write(playwright_cmd)
 
         return f"Navigating to {url} returned status code {status}"

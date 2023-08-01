@@ -74,28 +74,23 @@ class ClickByTextTool(BaseBrowserTool):
             if await el.is_visible():
                 await el.click(timeout=self.playwright_timeout)
                 # write playwright command to temp file
-                playwright_cmd = f"await page.getByRole('{selector}').getByText('{text}').click();\n"
+                playwright_cmd = f"    await page.getByRole('{selector}').getByText('{text}').click();\n"
                 with open('tempfile', 'a') as f:
-                    f.write('    ')
                     f.write(playwright_cmd)
             else:
                 # if not visible, try to click on element only by text
                 await page.get_by_text(text).click(timeout=self.playwright_timeout)
                 # write playwright command to temp file
-                playwright_cmd = f"await page.getByText('{text}').click();\n"
+                playwright_cmd = f"    await page.getByText('{text}').click();\n"
                 with open('tempfile', 'a') as f:
-                    f.write('    ')
                     f.write(playwright_cmd)
         except Exception as e:
             try:
-                print("jsem v exception a zkousim dal kliknout")
-                print(f"{selector}:has-text('{text}')")
                 # if there are more than one element with the same text, click on the first one
                 await page.click(f"{selector}:has-text('{text}')", strict=False)
                 # write playwright command to temp file
-                playwright_cmd = f"await page.click(\"{selector}:has-text('{text}')\");\n"
+                playwright_cmd = f"    await page.click(\"{selector}:has-text('{text}')\");\n"
                 with open('tempfile', 'a') as f:
-                    f.write('    ')
                     f.write(playwright_cmd)
             except PlaywrightTimeoutError as e2:
                 return f"Unable to click on element with selector: '{selector}' text:'{text}'with exception: {e2}"
