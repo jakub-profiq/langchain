@@ -52,4 +52,11 @@ class NavigateTool(BaseBrowserTool):
         page = await aget_current_page(self.async_browser)
         response = await page.goto(url)
         status = response.status if response else "unknown"
+
+        # write playwright command to temp file
+        playwright_cmd = f"await page.goto('{url}');\n"
+        with open('tempfile', 'a') as f:
+            f.write('    ')
+            f.write(playwright_cmd)
+
         return f"Navigating to {url} returned status code {status}"

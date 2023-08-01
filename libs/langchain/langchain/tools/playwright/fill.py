@@ -40,6 +40,10 @@ class FillTool(BaseBrowserTool):
         # try to enter the text on the element by text
         try:
             page.locator(selector).fill(text, timeout=1000)
+             # write playwright command to temp file
+            playwright_cmd = f"    page.locator(\"{selector}\").fill('{text}');\n"
+            with open('tempfile', 'a') as f:
+                f.write(playwright_cmd)
         except Exception as e:
             return f"Unable to fill up text on element '{selector}' with exception: {e}"
 
@@ -57,6 +61,10 @@ class FillTool(BaseBrowserTool):
         # try to enter the text on the element by text
         try:
             await page.locator(selector).fill(text)
+            # write playwright command to temp file
+            playwright_cmd = f"    await page.locator(\"{selector}\").fill('{text}');\n"
+            with open('tempfile', 'a') as f:
+                f.write(playwright_cmd)
         except Exception as e:
             return f"Unable to fill up text on element '{selector}' with exception: {e}"
         return "Text input on the element by text", selector ,"was successfully performed"

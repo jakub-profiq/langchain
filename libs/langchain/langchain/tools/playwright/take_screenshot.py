@@ -33,6 +33,10 @@ class TakeScreenshotTool(BaseBrowserTool):
         page = aget_current_page(self.async_browser)
         try:
             page.screenshot(path=path)
+            # write playwright command to temp file
+            playwright_cmd = f"    page.screenshot({{path:'{path}'}});\n"
+            with open('tempfile', 'a') as f:
+                f.write(playwright_cmd)
         except Exception as e:
             return f"Unable to take screenshot with exception: {e}"
         return "Screenshot taken"
@@ -47,6 +51,11 @@ class TakeScreenshotTool(BaseBrowserTool):
         page = await aget_current_page(self.async_browser)
         try:
             await page.screenshot(path=path)
+            # write playwright command to temp file
+            playwright_cmd = f"    await page.screenshot({{path:'{path}'}});\n"
+            with open('tempfile', 'a') as f:
+                f.write(playwright_cmd)
+
         except Exception as e:
             return f"Unable to take screenshot with exception: {e}"
         return "Screenshot taken"
