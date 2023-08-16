@@ -61,6 +61,8 @@ class ExpectTitleTool(BaseBrowserTool):
             with open('tempfile', 'a') as f:
                 f.write(playwrite_command)
         except Exception as e:
+            with open('tempfile', 'a') as f:
+                f.write(f"    // FAIL - expect().toHaveTitle('{title})\n")
             return f"Cannot to find '{title}' with exception: {e}"
 
         return "Title: ", title ,"is visible on the current page."

@@ -28,6 +28,9 @@ class FillTool(BaseBrowserTool):
     )
     args_schema: Type[BaseModel] = FillToolInput
 
+    # Timeout (in ms) for Playwright to wait for element to be ready.
+    playwright_timeout: float = 1_000
+
     def _run(
         self,
         selector: str,
@@ -39,7 +42,7 @@ class FillTool(BaseBrowserTool):
         page = get_current_page(self.sync_browser)
         # try to enter the text on the element by text
         try:
-            page.locator(selector).fill(text, timeout=1000)
+            page.locator(selector).fill(text, timeout=self.playwright_timeout)
              # write playwright command to temp file
             playwright_cmd = f"    page.locator(\"{selector}\").fill('{text}');\n"
             with open('tempfile', 'a') as f:
@@ -60,7 +63,7 @@ class FillTool(BaseBrowserTool):
         page = await aget_current_page(self.async_browser)
         # try to enter the text on the element by text
         try:
-            await page.locator(selector).fill(text)
+            await page.locator(selector).fill(text, timeout=self.playwright_timeout)
             # write playwright command to temp file
             playwright_cmd = f"    await page.locator(\"{selector}\").fill('{text}');\n"
             with open('tempfile', 'a') as f:

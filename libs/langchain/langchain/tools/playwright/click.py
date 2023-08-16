@@ -82,6 +82,10 @@ class ClickTool(BaseBrowserTool):
                 strict=self.playwright_strict,
                 timeout=self.playwright_timeout,
             )
+            # write playwright command to temp file
+            playwright_cmd = f"    await page.click(\"{selector} >> visible = true\", {{ strict:false, timeout:{self.playwright_timeout}}});\n"
+            with open('tempfile', 'a') as f:
+                f.write(playwright_cmd)
         except PlaywrightTimeoutError:
             return f"Unable to click on element '{selector}'"
         return f"Clicked element '{selector}'"
