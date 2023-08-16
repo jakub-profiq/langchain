@@ -26,6 +26,8 @@ _EXPECTED = [
     "DeleteFileTool",
     "DuckDuckGoSearchResults",
     "DuckDuckGoSearchRun",
+    "ExpectTextTool",
+    "ExpectTitleTool",
     "ExtractHyperlinksTool",
     "ExtractTextTool",
     "FileSearchTool",

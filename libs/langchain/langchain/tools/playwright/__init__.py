@@ -3,6 +3,7 @@
 from langchain.tools.playwright.click import ClickTool
 from langchain.tools.playwright.click_by_text import ClickByTextTool
 from langchain.tools.playwright.current_page import CurrentWebPageTool
+from langchain.tools.playwright.expect_text import ExpectTextTool
 from langchain.tools.playwright.expect_title import ExpectTitleTool
 from langchain.tools.playwright.extract_hyperlinks import ExtractHyperlinksTool
 from langchain.tools.playwright.extract_text import ExtractTextTool
@@ -16,6 +17,7 @@ __all__ = [
     "TakeScreenshotTool",
     "NavigateTool",
     "NavigateBackTool",
+    "ExpectTextTool",
     "ExpectTitleTool",
     "ExtractTextTool",
     "ExtractHyperlinksTool",
