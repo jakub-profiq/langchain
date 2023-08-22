@@ -21,10 +21,10 @@ class ExpectTextToolInput(BaseModel):
 
 
 class ExpectTextTool(BaseBrowserTool):
+    """Tool for checking expected text."""
+
     name: str = "expect_text"
-    description: str = (
-        "Check if expected text is the same as the text of the current web page."
-    )
+    description: str = "Check if expected text is the same as the text of the current web page."
     args_schema: Type[BaseModel] = ExpectTextToolInput
 
     def _run(
@@ -32,19 +32,22 @@ class ExpectTextTool(BaseBrowserTool):
         text: str,
     ) -> str:
         """Use the tool."""
-        if self.sync_browser is None:
-            raise ValueError(f"Synchronous browser not provided to {self.name}")
-        page = get_current_page(self.sync_browser)
+        if self.async_browser is None:
+            raise ValueError(f"Asynchronous browser not provided to {self.name}")
+        page = get_current_page(self.async_browser)
         # check if the text is the same as expected
         try:
-            syncExpect(page).to_have_text(text)
-            playwrite_command = f"    expect(page).toHaveText(/{text}/);\n"
+            element = page.get_by_text(text).first;
+            syncExpect(element).to_have_text(text)
+            playwrite_command = f"    await expect(page.getByText(/{text}/)).toHaveText(/{text}/);\n"
             with open('tempfile', 'a') as f:
                 f.write(playwrite_command)
         except Exception as e:
+            with open('tempfile', 'a') as f:
+                f.write(f"    // FAIL - expect().toHaveText('{text}')\n")
             return f"Cannot to find '{text}' with exception: {e}"
 
-        return "Text: ", text ,"is visible on the current page."
+        return "Text: ", text, "is visible on the current page."
 
     async def _arun(
         self,

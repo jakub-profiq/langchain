@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 
 from langchain.tools.playwright.base import BaseBrowserTool
 from langchain.tools.playwright.utils import aget_current_page, get_current_page
-from langchain.tools.playwright.utils import aget_current_page, get_current_page
 from playwright.sync_api import expect as syncExpect
 from playwright.async_api import expect as asyncExpect
 
@@ -21,10 +20,10 @@ class ExpectTitleToolInput(BaseModel):
 
 
 class ExpectTitleTool(BaseBrowserTool):
+    """Tool for checking expected title."""
+
     name: str = "expect_title"
-    description: str = (
-        "Check if expected title is the same as the title of the current web page."
-    )
+    description: str = "Check if expected title is the same as the title of the current web page."
     args_schema: Type[BaseModel] = ExpectTitleToolInput
 
     def _run(

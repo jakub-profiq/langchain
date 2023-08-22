@@ -14,6 +14,7 @@ from langchain.tools.playwright.utils import (
     get_current_page,
 )
 
+from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 
 class ClickToolInput(BaseModel):
     """Input for ClickTool."""
@@ -32,7 +33,7 @@ class ClickTool(BaseBrowserTool):
     """Whether to consider only visible elements."""
     playwright_strict: bool = False
     """Whether to employ Playwright's strict mode when clicking on elements."""
-    playwright_timeout: float = 1_000
+    playwright_timeout: float = 3_000
     """Timeout (in ms) for Playwright to wait for element to be ready."""
 
     def _selector_effective(self, selector: str) -> str:
@@ -43,7 +44,6 @@ class ClickTool(BaseBrowserTool):
     def _run(
         self,
         selector: str,
-        run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> str:
         """Use the tool."""
         if self.sync_browser is None:
@@ -51,7 +51,6 @@ class ClickTool(BaseBrowserTool):
         page = get_current_page(self.sync_browser)
         # Navigate to the desired webpage before using this tool
         selector_effective = self._selector_effective(selector=selector)
-        from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
         try:
             page.click(
@@ -59,6 +58,10 @@ class ClickTool(BaseBrowserTool):
                 strict=self.playwright_strict,
                 timeout=self.playwright_timeout,
             )
+            # write playwright command to temp file
+            playwright_cmd = f"    page.click(\"{selector} >> visible = true\", {{ strict:{self.playwright_strict}, timeout:{self.playwright_timeout}}});\n"
+            with open('tempfile', 'a') as f:
+                f.write(playwright_cmd)
         except PlaywrightTimeoutError:
             return f"Unable to click on element '{selector}'"
         return f"Clicked element '{selector}'"
@@ -66,7 +69,6 @@ class ClickTool(BaseBrowserTool):
     async def _arun(
         self,
         selector: str,
-        run_manager: Optional[AsyncCallbackManagerForToolRun] = None,
     ) -> str:
         """Use the tool."""
         if self.async_browser is None:
@@ -74,7 +76,6 @@ class ClickTool(BaseBrowserTool):
         page = await aget_current_page(self.async_browser)
         # Navigate to the desired webpage before using this tool
         selector_effective = self._selector_effective(selector=selector)
-        from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 
         try:
             await page.click(
@@ -83,7 +84,7 @@ class ClickTool(BaseBrowserTool):
                 timeout=self.playwright_timeout,
             )
             # write playwright command to temp file
-            playwright_cmd = f"    await page.click(\"{selector} >> visible = true\", {{ strict:false, timeout:{self.playwright_timeout}}});\n"
+            playwright_cmd = f"    await page.click(\"{selector} >> visible = true\", {{ strict:{self.playwright_strict}, timeout:{self.playwright_timeout}}});\n"
             with open('tempfile', 'a') as f:
                 f.write(playwright_cmd)
         except PlaywrightTimeoutError:

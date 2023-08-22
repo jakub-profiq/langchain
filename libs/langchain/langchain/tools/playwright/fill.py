@@ -22,14 +22,14 @@ class FillToolInput(BaseModel):
 
 
 class FillTool(BaseBrowserTool):
+    """Tool for filling text to the element with the given CSS selector."""
+
     name: str = "fill_element"
-    description: str = (
-        "Text input on element in the current web page matching the text content"
-    )
+    description: str = "Text input on element in the current web page matching the text content"
     args_schema: Type[BaseModel] = FillToolInput
 
     # Timeout (in ms) for Playwright to wait for element to be ready.
-    playwright_timeout: float = 1_000
+    playwright_timeout: float = 2_000
 
     def _run(
         self,
