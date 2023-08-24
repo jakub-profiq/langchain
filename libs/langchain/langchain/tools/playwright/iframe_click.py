@@ -13,80 +13,72 @@ from langchain.tools.playwright.utils import (
     aget_current_page,
     get_current_page,
 )
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
-from playwright.async_api import TimeoutError as PlaywrightTimeoutError
+class IframeClickToolInput(BaseModel):
+    """Input for IframeClickByTextToolInput."""
 
-class ClickToolInput(BaseModel):
-    """Input for ClickTool."""
-
-    selector: str = Field(..., description="CSS selector for the element to click")
+    iframe: str = Field(..., description="Selector for the iframe.")
+    selector: str = Field(..., description="Selector for desired element.")
 
 
-class ClickTool(BaseBrowserTool):
-    """Tool for clicking on an element with the given CSS selector."""
+class IframeClickTool(BaseBrowserTool):
+    """Tool for clicking on an element with given selector inside iframe."""
 
-    name: str = "click_element"
-    description: str = "Click on an element with the given CSS selector"
-    args_schema: Type[BaseModel] = ClickToolInput
+    name: str = "iframe_click"
+    description: str = "Click in specified iframe on element with the given selector"
+    args_schema: Type[BaseModel] = IframeClickToolInput
 
     visible_only: bool = True
     """Whether to consider only visible elements."""
     playwright_strict: bool = False
     """Whether to employ Playwright's strict mode when clicking on elements."""
-    playwright_timeout: float = 3_000
+    playwright_timeout: float = 1_000
     """Timeout (in ms) for Playwright to wait for element to be ready."""
 
-    def _selector_effective(self, selector: str) -> str:
-        if not self.visible_only:
-            return selector
-        return f"{selector} >> visible=1"
 
     def _run(
         self,
+        iframe: str,
         selector: str,
     ) -> str:
         """Use the tool."""
         if self.sync_browser is None:
             raise ValueError(f"Synchronous browser not provided to {self.name}")
-        page = get_current_page(self.sync_browser)
         # Navigate to the desired webpage before using this tool
-        selector_effective = self._selector_effective(selector=selector)
+        page = get_current_page(self.sync_browser)
 
         try:
-            page.click(
-                selector_effective,
-                strict=self.playwright_strict,
-                timeout=self.playwright_timeout,
-            )
+            page.frame_locator(iframe).locator(selector).click()
             # write playwright command to temp file
-            playwright_cmd = f"    page.click(\"{selector} >> visible = true\", {{ strict:{self.playwright_strict}, timeout:{self.playwright_timeout}}});\n"
+            playwright_cmd = f"    page.frameLocator(\"{iframe}\").locator(\"{selector}\").click();\n"
             with open('tempfile', 'a') as f:
                 f.write(playwright_cmd)
         except PlaywrightTimeoutError:
+            with open('tempfile', 'a') as f:
+                f.write(f"    // FAIL - page.frameLocator(\"{iframe}\").locator(\"{selector}\").click();)\n")
             return f"Unable to click on element '{selector}'"
         return f"Clicked element '{selector}'"
 
     async def _arun(
         self,
+        iframe: str,
         selector: str,
     ) -> str:
         """Use the tool."""
         if self.async_browser is None:
             raise ValueError(f"Asynchronous browser not provided to {self.name}")
-        page = await aget_current_page(self.async_browser)
         # Navigate to the desired webpage before using this tool
-        selector_effective = self._selector_effective(selector=selector)
+        page = await aget_current_page(self.async_browser)
 
         try:
-            await page.click(
-                selector_effective,
-                strict=self.playwright_strict,
-                timeout=self.playwright_timeout,
-            )
+            await page.frame_locator(iframe).locator(selector).click()
             # write playwright command to temp file
-            playwright_cmd = f"    await page.click(\"{selector} >> visible = true\", {{ strict:{str(self.playwright_strict).lower()}, timeout:{self.playwright_timeout}}});\n"
+            playwright_cmd = f"    await page.frameLocator(\"{iframe}\").locator(\"{selector}\").click();\n"
             with open('tempfile', 'a') as f:
                 f.write(playwright_cmd)
         except PlaywrightTimeoutError:
+            with open('tempfile', 'a') as f:
+                f.write(f"    // FAIL - await page.frameLocator(\"{iframe}\").locator(\"{selector}\").click();)\n")
             return f"Unable to click on element '{selector}'"
         return f"Clicked element '{selector}'"

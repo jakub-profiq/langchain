@@ -32,14 +32,14 @@ class ExpectTextTool(BaseBrowserTool):
         text: str,
     ) -> str:
         """Use the tool."""
-        if self.async_browser is None:
-            raise ValueError(f"Asynchronous browser not provided to {self.name}")
-        page = get_current_page(self.async_browser)
+        if self.sync_browser is None:
+            raise ValueError(f"Synchronous browser not provided to {self.name}")
+        page = get_current_page(self.sync_browser)
         # check if the text is the same as expected
         try:
             element = page.get_by_text(text).first;
             syncExpect(element).to_have_text(text)
-            playwrite_command = f"    await expect(page.getByText(/{text}/)).toHaveText(/{text}/);\n"
+            playwrite_command = f"    expect(page.getByText(/{text}/)).toHaveText(/{text}/);\n"
             with open('tempfile', 'a') as f:
                 f.write(playwrite_command)
         except Exception as e:

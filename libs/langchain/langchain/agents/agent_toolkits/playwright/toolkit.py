@@ -13,6 +13,10 @@ from langchain.tools.playwright.base import (
 )
 from langchain.tools.playwright.click import ClickTool
 from langchain.tools.playwright.click_by_text import ClickByTextTool
+from langchain.tools.playwright.iframe_click import IframeClickTool
+from langchain.tools.playwright.iframe_click_by_text import IframeClickByTextTool
+from langchain.tools.playwright.iframe_expect_hidden import IframeExpectHiddenTool
+from langchain.tools.playwright.iframe_upload import IframeUploadTool
 from langchain.tools.playwright.current_page import CurrentWebPageTool
 from langchain.tools.playwright.expect_text import ExpectTextTool
 from langchain.tools.playwright.expect_title import ExpectTitleTool
@@ -61,6 +65,10 @@ class PlayWrightBrowserToolkit(BaseToolkit):
         tool_classes: List[Type[BaseBrowserTool]] = [
             ClickTool,
             ClickByTextTool,
+            IframeClickTool,
+            IframeClickByTextTool,
+            IframeExpectHiddenTool,
+            IframeUploadTool,
             NavigateTool,
             NavigateBackTool,
             ExpectTextTool,

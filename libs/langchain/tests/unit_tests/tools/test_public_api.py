@@ -45,6 +45,10 @@ _EXPECTED = [
     "GoogleSerperRun",
     "HumanInputRun",
     "IFTTTWebhook",
+    "IframeClickTool",
+    "IframeClickByTextTool",
+    "IframeExpectHiddenTool",
+    "IframeUploadTool"
     "InfoPowerBITool",
     "InfoSQLDatabaseTool",
     "InfoSparkSQLTool",
