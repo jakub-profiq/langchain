@@ -63,6 +63,8 @@ class ClickTool(BaseBrowserTool):
             with open('tempfile', 'a') as f:
                 f.write(playwright_cmd)
         except PlaywrightTimeoutError:
+            with open('tempfile', 'a') as f:
+                f.write(f"    // FAIL page.click(\"{selector} >> visible = true\", {{ strict:{str(self.playwright_strict).lower()}, timeout:{self.playwright_timeout}}});\n")
             return f"Unable to click on element '{selector}'"
         return f"Clicked element '{selector}'"
 
@@ -88,5 +90,7 @@ class ClickTool(BaseBrowserTool):
             with open('tempfile', 'a') as f:
                 f.write(playwright_cmd)
         except PlaywrightTimeoutError:
+            with open('tempfile', 'a') as f:
+                f.write(f"    // FAIL await page.click(\"{selector} >> visible = true\", {{ strict:{str(self.playwright_strict).lower()}, timeout:{self.playwright_timeout}}});\n")
             return f"Unable to click on element '{selector}'"
         return f"Clicked element '{selector}'"

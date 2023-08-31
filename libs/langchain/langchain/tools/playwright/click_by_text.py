@@ -106,7 +106,7 @@ class ClickByTextTool(BaseBrowserTool):
                 # if there are more than one element with the same text, click on the first one
                 await page.click(f"{selector}:has-text('{text}')", strict=False, timeout=self.playwright_timeout)
                 # write playwright command to temp file
-                playwright_cmd = f"    await page.click(\"{selector}:has-text('{text}'), {{timeout:{self.playwright_timeout}}}\");\n"
+                playwright_cmd = f"    await page.click(\"{selector}:has-text('{text}')\", {{timeout:{self.playwright_timeout}}});\n"
                 with open('tempfile', 'a') as f:
                     f.write(playwright_cmd)
             except PlaywrightTimeoutError as e2:

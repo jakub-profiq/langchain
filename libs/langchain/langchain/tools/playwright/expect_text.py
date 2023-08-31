@@ -14,10 +14,8 @@ from playwright.async_api import expect as asyncExpect
 class ExpectTextToolInput(BaseModel):
     """Input for ExpectTextTool."""
 
-    text: str = Field(
-        ...,
-        description="Text what you expect to see.",
-    )
+    text: str = Field(..., description="Text what you expect to see.")
+    index: int = Field(0, description="Index of the element to check.")
 
 
 class ExpectTextTool(BaseBrowserTool):
@@ -30,6 +28,7 @@ class ExpectTextTool(BaseBrowserTool):
     def _run(
         self,
         text: str,
+        index: int = 0,
     ) -> str:
         """Use the tool."""
         if self.sync_browser is None:
@@ -37,14 +36,14 @@ class ExpectTextTool(BaseBrowserTool):
         page = get_current_page(self.sync_browser)
         # check if the text is the same as expected
         try:
-            element = page.get_by_text(text).first;
+            element = page.get_by_text(text).nth(index);
             syncExpect(element).to_have_text(text)
-            playwrite_command = f"    expect(page.getByText(/{text}/)).toHaveText(/{text}/);\n"
+            playwrite_command = f"    expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n"
             with open('tempfile', 'a') as f:
                 f.write(playwrite_command)
         except Exception as e:
             with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - expect().toHaveText('{text}')\n")
+                f.write(f"    // FAIL - expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n")
             return f"Cannot to find '{text}' with exception: {e}"
 
         return "Text: ", text, "is visible on the current page."
@@ -52,6 +51,7 @@ class ExpectTextTool(BaseBrowserTool):
     async def _arun(
         self,
         text: str,
+        index: int = 0,
     ) -> str:
         """Use the tool."""
         if self.async_browser is None:
@@ -59,14 +59,14 @@ class ExpectTextTool(BaseBrowserTool):
         page = await aget_current_page(self.async_browser)
         # check if the text is the same as expected
         try:
-            element = page.get_by_text(text).first;
+            element = page.get_by_text(text).nth(index);
             await asyncExpect(element).to_have_text(text)
-            playwrite_command = f"    await expect(page.getByText(/{text}/)).toHaveText(/{text}/);\n"
+            playwrite_command = f"    await expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n"
             with open('tempfile', 'a') as f:
                 f.write(playwrite_command)
         except Exception as e:
             with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - expect().toHaveText('{text}')\n")
+                f.write(f"    // FAIL - expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n")
             return f"Cannot to find '{text}' with exception: {e}"
 
         return "Text: ", text, "is visible on the current page."
