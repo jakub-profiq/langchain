@@ -36,13 +36,13 @@ class IframeExpectHiddenTool(BaseBrowserTool):
         page = get_current_page(self.sync_browser)
         # check if the text is the same as expected
         try:
-            syncExpect(page.frame_locator(iframe).locator(selector).first).to_be_hidden()
-            playwrite_command = f"    expect(page.frameLocator(\"{iframe}\").locator(\"{selector}\")).toBeHidden();\n"
+            syncExpect(page.frame_locator(iframe).last.locator(selector)).to_be_hidden()
+            playwrite_command = f"    expect(page.frameLocator(\"{iframe}\").last.locator(\"{selector}\")).toBeHidden();\n"
             with open('tempfile', 'a') as f:
                 f.write(playwrite_command)
         except Exception as e:
             with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - expect(page.frameLocator(\"{iframe}\").locator(\"{selector}\")).toBeHidden();\n")
+                f.write(f"    // FAIL - expect(page.frameLocator(\"{iframe}\").last.locator(\"{selector}\")).toBeHidden();\n")
             return f"Cannot to find iframe '{iframe}' with selector '{selector}' with exception: {e}"
 
         return "Element: ", selector, " in iframe: ", iframe, "is hidden on the current page."
@@ -58,13 +58,13 @@ class IframeExpectHiddenTool(BaseBrowserTool):
         page = await aget_current_page(self.async_browser)
         # check if the text is the same as expected
         try:
-            await asyncExpect(page.frame_locator(iframe).locator(selector).first).to_be_hidden()
-            playwrite_command = f"    await expect(page.frameLocator(\"{iframe}\").locator(\"{selector}\")).toBeHidden();\n"
+            await asyncExpect(page.frame_locator(iframe).last.locator(selector)).to_be_hidden()
+            playwrite_command = f"    await expect(page.frameLocator(\"{iframe}\").last().locator(\"{selector}\")).toBeHidden();\n"
             with open('tempfile', 'a') as f:
                 f.write(playwrite_command)
         except Exception as e:
             with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - expect(page.frameLocator(\"{iframe}\").locator(\"{selector}\")).toBeHidden();")
+                f.write(f"    // FAIL - expect(page.frameLocator(\"{iframe}\").last().locator(\"{selector}\")).toBeHidden();")
             return f"Cannot to find iframe '{iframe}' with selector '{selector}' with exception: {e}"
 
         return "Element: ", selector, " in iframe: ", iframe, "is hidden on the current page."

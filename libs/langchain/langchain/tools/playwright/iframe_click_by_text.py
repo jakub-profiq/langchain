@@ -16,7 +16,7 @@ from langchain.tools.playwright.utils import (
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 
 class IframeClickByTextToolInput(BaseModel):
-    """Input for IframeClickByTextToolInput."""
+    """Input for IframeClickByTextTool."""
 
     iframe: str = Field(..., description="Selector for the iframe.")
     text: str = Field(..., description="Text what should be displayed in element.")
@@ -26,7 +26,7 @@ class IframeClickByTextTool(BaseBrowserTool):
     """Tool for clicking on an element with given text inside iframe."""
 
     name: str = "iframe_click_by_text"
-    description: str = "Click in specified iframe on element with the given text"
+    description: str = "Click in iframe on element with the given text"
     args_schema: Type[BaseModel] = IframeClickByTextToolInput
 
     visible_only: bool = True
@@ -50,14 +50,14 @@ class IframeClickByTextTool(BaseBrowserTool):
         
 
         try:
-            page.frame_locator(iframe).get_by_text(text).click()
+            page.frame_locator(iframe).last.get_by_text(text).click()
             # write playwright command to temp file
-            playwright_cmd = f"    page.frameLocator(\"{iframe}\").getByText(\"{text}\").click();\n"
+            playwright_cmd = f"    page.frameLocator(\"{iframe}\").last().getByText(\"{text}\").click();\n"
             with open('tempfile', 'a') as f:
                 f.write(playwright_cmd)
         except PlaywrightTimeoutError:
             with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - page.frameLocator(\"{iframe}\").getByText(\"{text}\").click();)\n")
+                f.write(f"    // FAIL - page.frameLocator(\"{iframe}\").last().getByText(\"{text}\").click();)\n")
             return f"Unable to click on element '{text}'"
         return f"Clicked element '{text}'"
 
@@ -73,13 +73,13 @@ class IframeClickByTextTool(BaseBrowserTool):
         page = await aget_current_page(self.async_browser)
 
         try:
-            await page.frame_locator(iframe).get_by_text(text).click()
+            await page.frame_locator(iframe).last.get_by_text(text).click()
             # write playwright command to temp file
-            playwright_cmd = f"    await page.frameLocator(\"{iframe}\").getByText(\"{text}\").click();\n"
+            playwright_cmd = f"    await page.frameLocator(\"{iframe}\").last().getByText(\"{text}\").click();\n"
             with open('tempfile', 'a') as f:
                 f.write(playwright_cmd)
         except PlaywrightTimeoutError:
             with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - await page.frameLocator(\"{iframe}\").getByText(\"{text}\").click();)\n")
+                f.write(f"    // FAIL - await page.frameLocator(\"{iframe}\").last().getByText(\"{text}\").click();\n")
             return f"Unable to click on element '{text}'"
         return f"Clicked element '{text}'"

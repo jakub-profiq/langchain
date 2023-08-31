@@ -49,14 +49,14 @@ class IframeUploadTool(BaseBrowserTool):
         page = get_current_page(self.sync_browser)
 
         try:
-            page.frame_locator(iframe).locator("input[type=file]").set_input_files(path)
+            page.frame_locator(iframe).last.locator("input[type=file]").set_input_files(path)
             # write playwright command to temp file
-            playwright_cmd = f"    page.frameLocator(\"{iframe}\").locator(\"input[type=file]\").set_input_files(\"{path}\");\n"
+            playwright_cmd = f"    page.frameLocator(\"{iframe}\").last().locator(\"input[type=file]\").set_input_files(\"{path}\");\n"
             with open('tempfile', 'a') as f:
                 f.write(playwright_cmd)
         except PlaywrightTimeoutError:
             with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - page.frameLocator(\"{iframe}\").locator(\"input[type=file]\").setInputFiles(\"{path}\");\n")
+                f.write(f"    // FAIL - page.frameLocator(\"{iframe}\").last().locator(\"input[type=file]\").setInputFiles(\"{path}\");\n")
             return f"Unable to upload files '{path}' in iframe"
         return f"Uploaded files '{path}'"
 
@@ -72,13 +72,13 @@ class IframeUploadTool(BaseBrowserTool):
         page = await aget_current_page(self.async_browser)
 
         try:
-            await page.frame_locator(iframe).locator("input[type=file]").set_input_files(path)
+            await page.frame_locator(iframe).last.locator("input[type=file]").set_input_files(path)
             # write playwright command to temp file
-            playwright_cmd = f"    await page.frameLocator(\"{iframe}\").locator(\"input[type=file]\").setInputFiles(\"{path}\");\n"
+            playwright_cmd = f"    await page.frameLocator(\"{iframe}\").last().locator(\"input[type=file]\").setInputFiles(\"{path}\");\n"
             with open('tempfile', 'a') as f:
                 f.write(playwright_cmd)
         except PlaywrightTimeoutError:
             with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - await page.frameLocator(\"{iframe}\").locator(\"input[type=file]\").set_input_files(\"{path}\");\n")
+                f.write(f"    // FAIL - await page.frameLocator(\"{iframe}\").last().locator(\"input[type=file]\").set_input_files(\"{path}\");\n")
             return f"Unable to upload files '{path}' in iframe"
         return f"Uploaded files '{path}'"
