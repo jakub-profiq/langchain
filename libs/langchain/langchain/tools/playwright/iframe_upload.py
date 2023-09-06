@@ -4,16 +4,11 @@ from typing import Optional, Type
 
 from pydantic import BaseModel, Field
 
-from langchain.callbacks.manager import (
-    AsyncCallbackManagerForToolRun,
-    CallbackManagerForToolRun,
-)
+from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, CallbackManagerForToolRun
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import (
-    aget_current_page,
-    get_current_page,
-)
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+
 
 class IframeUploadToolInput(BaseModel):
     """Input for class IframeUploadToolInput"""
@@ -35,7 +30,6 @@ class IframeUploadTool(BaseBrowserTool):
     """Whether to employ Playwright's strict mode when clicking on elements."""
     playwright_timeout: float = 1_000
     """Timeout (in ms) for Playwright to wait for element to be ready."""
-
 
     def _run(
         self,
@@ -70,15 +64,12 @@ class IframeUploadTool(BaseBrowserTool):
             raise ValueError(f"Synchronous browser not provided to {self.name}")
         # Navigate to the desired webpage before using this tool
         page = await aget_current_page(self.async_browser)
+        playwright_cmd = f"await page.frameLocator(\"{iframe}\").last().locator(\"input[type=file]\").setInputFiles(\"{path}\");\n"
 
         try:
             await page.frame_locator(iframe).last.locator("input[type=file]").set_input_files(path)
-            # write playwright command to temp file
-            playwright_cmd = f"    await page.frameLocator(\"{iframe}\").last().locator(\"input[type=file]\").setInputFiles(\"{path}\");\n"
-            with open('tempfile', 'a') as f:
-                f.write(playwright_cmd)
+            open('tempfile', 'a').write(f'    {playwright_cmd}')    # write playwright command to temp file
         except PlaywrightTimeoutError:
-            with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - await page.frameLocator(\"{iframe}\").last().locator(\"input[type=file]\").set_input_files(\"{path}\");\n")
+            await awrite_to_file(msg=playwright_cmd, page=page)
             return f"Unable to upload files '{path}' in iframe"
         return f"Uploaded files '{path}'"

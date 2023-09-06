@@ -4,12 +4,9 @@ from typing import Optional, Type
 
 from pydantic import BaseModel, Field
 
-from langchain.callbacks.manager import (
-    AsyncCallbackManagerForToolRun,
-    CallbackManagerForToolRun,
-)
+from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, CallbackManagerForToolRun
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import aget_current_page, get_current_page
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file
 
 
 class TakeScreenshotToolInput(BaseModel):
@@ -54,14 +51,12 @@ class TakeScreenshotTool(BaseBrowserTool):
         if self.async_browser is None:
             raise ValueError(f"Asynchronous browser not provided to {self.name}")
         page = await aget_current_page(self.async_browser)
+        playwright_cmd = f"await page.screenshot({{path:'{path}', fullPage:{str(full).lower()}}});\n"
+
         try:
             await page.screenshot(path=path, full_page=full)
-            # write playwright command to temp file
-            playwright_cmd = f"    await page.screenshot({{path:'{path}', fullPage:{str(full).lower()}}});\n"
-            with open('tempfile', 'a') as f:
-                f.write(playwright_cmd)
+            open('tempfile', 'a').write(f'    {playwright_cmd}')    # write playwright command to temp file
         except Exception as e:
-            with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - await page.screenshot({{path:'{path}', fullPage:{str(full).lower()}}});\n")
+            await awrite_to_file(msg=playwright_cmd, page=page)
             return f"Unable to take screenshot with exception: {e}"
         return "Screenshot taken"

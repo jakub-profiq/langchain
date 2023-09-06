@@ -4,15 +4,9 @@ from typing import Optional, Type
 
 from pydantic import BaseModel, Field
 
-from langchain.callbacks.manager import (
-    AsyncCallbackManagerForToolRun,
-    CallbackManagerForToolRun,
-)
+from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, CallbackManagerForToolRun
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import (
-    aget_current_page,
-    get_current_page,
-)
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file
 
 
 class NavigateToolInput(BaseModel):
@@ -56,12 +50,14 @@ class NavigateTool(BaseBrowserTool):
         if self.async_browser is None:
             raise ValueError(f"Asynchronous browser not provided to {self.name}")
         page = await aget_current_page(self.async_browser)
-        response = await page.goto(url)
-        status = response.status if response else "unknown"
+        playwright_cmd = f"await page.goto('{url}');\n"
 
-        # write playwright command to temp file
-        playwright_cmd = f"    await page.goto('{url}');\n"
-        with open('tempfile', 'a') as f:
-            f.write(playwright_cmd)
+        try:
+            response = await page.goto(url)
+            status = response.status if response else "unknown"
+            open('tempfile', 'a').write(f'    {playwright_cmd}')    # write playwright command to temp file
+        except Exception as e:
+            await awrite_to_file(msg=playwright_cmd, page=page)
+            return f"Unable to navigate to {url}"
 
         return f"Navigating to {url} returned status code {status}"

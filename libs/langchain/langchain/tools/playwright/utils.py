@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import asyncio
+import datetime
+import json
+import os
 from typing import TYPE_CHECKING, Any, Coroutine, TypeVar
 
 if TYPE_CHECKING:
@@ -96,3 +99,14 @@ def run_async(coro: Coroutine[Any, Any, T]) -> T:
     """
     event_loop = asyncio.get_event_loop()
     return event_loop.run_until_complete(coro)
+
+
+async def ascreenshot_page(page: any) -> str:
+    prod_name = str(json.load(open('lang_conf.json', 'r'))['product']).replace("'", "")
+    scr_path = os.path.join(os.path.curdir, f"screenshot/{prod_name}/fail-{prod_name}-{str(datetime.datetime.now()).replace(' ', '-')}.png")
+    await page.screenshot(path=scr_path, full_page=False)
+    return scr_path
+
+
+async def awrite_to_file(msg: str, page: any) -> None:
+    open('tempfile', 'a').write(f'    // FAIL - {msg}    // FAIL - {await ascreenshot_page(page)} \n')

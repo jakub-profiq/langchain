@@ -4,16 +4,11 @@ from typing import Optional, Type
 
 from pydantic import BaseModel, Field
 
-from langchain.callbacks.manager import (
-    AsyncCallbackManagerForToolRun,
-    CallbackManagerForToolRun,
-)
+from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, CallbackManagerForToolRun
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import (
-    aget_current_page,
-    get_current_page,
-)
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
+
 
 class IframeClickByTextToolInput(BaseModel):
     """Input for IframeClickByTextTool."""
@@ -36,7 +31,6 @@ class IframeClickByTextTool(BaseBrowserTool):
     playwright_timeout: float = 1_000
     """Timeout (in ms) for Playwright to wait for element to be ready."""
 
-
     def _run(
         self,
         iframe: str,
@@ -47,7 +41,6 @@ class IframeClickByTextTool(BaseBrowserTool):
             raise ValueError(f"Synchronous browser not provided to {self.name}")
         # Navigate to the desired webpage before using this tool
         page = get_current_page(self.sync_browser)
-        
 
         try:
             page.frame_locator(iframe).last.get_by_text(text).click()
@@ -71,15 +64,12 @@ class IframeClickByTextTool(BaseBrowserTool):
             raise ValueError(f"Asynchronous browser not provided to {self.name}")
         # Navigate to the desired webpage before using this tool
         page = await aget_current_page(self.async_browser)
+        playwright_cmd = f"    await page.frameLocator(\"{iframe}\").last().getByText(\"{text}\").click();\n"
 
         try:
             await page.frame_locator(iframe).last.get_by_text(text).click()
-            # write playwright command to temp file
-            playwright_cmd = f"    await page.frameLocator(\"{iframe}\").last().getByText(\"{text}\").click();\n"
-            with open('tempfile', 'a') as f:
-                f.write(playwright_cmd)
+            open('tempfile', 'a').write(f'    {playwright_cmd}')    # write playwright command to temp file
         except PlaywrightTimeoutError:
-            with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - await page.frameLocator(\"{iframe}\").last().getByText(\"{text}\").click();\n")
+            await awrite_to_file(msg=playwright_cmd, page=page)
             return f"Unable to click on element '{text}'"
         return f"Clicked element '{text}'"

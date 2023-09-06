@@ -5,7 +5,7 @@ from typing import Type
 from pydantic import BaseModel, Field
 
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import aget_current_page, get_current_page
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file
 
 
 class FillToolInput(BaseModel):
@@ -61,13 +61,12 @@ class FillTool(BaseBrowserTool):
         if self.async_browser is None:
             raise ValueError(f"Asynchronous browser not provided to {self.name}")
         page = await aget_current_page(self.async_browser)
+        playwright_cmd = f"await page.locator(\"{selector}\").fill('{text}');\n"
         # try to enter the text on the element by text
         try:
             await page.locator(selector).fill(text, timeout=self.playwright_timeout)
-            # write playwright command to temp file
-            playwright_cmd = f"    await page.locator(\"{selector}\").fill('{text}');\n"
-            with open('tempfile', 'a') as f:
-                f.write(playwright_cmd)
+            open('tempfile', 'a').write(f'    {playwright_cmd}')
         except Exception as e:
+            await awrite_to_file(msg=playwright_cmd, page=page)
             return f"Unable to fill up text on element '{selector}' with exception: {e}"
-        return "Text input on the element by text", selector ,"was successfully performed"
+        return f"Text input on the element by text, {selector} ,was successfully performed"
