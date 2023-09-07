@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, CallbackManagerForToolRun
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_to_fail_file
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_fail_to_file
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 
@@ -70,6 +70,6 @@ class IframeClickTool(BaseBrowserTool):
             await page.frame_locator(iframe).last.locator(selector).click()
             await awrite_to_file(msg=f'    {playwright_cmd}')
         except PlaywrightTimeoutError:
-            await awrite_to_fail_file(msg=playwright_cmd, page=page)
+            await awrite_fail_to_file(msg=playwright_cmd, page=page)
             return f"Unable to click on element '{selector}'"
         return f"Clicked element '{selector}'"

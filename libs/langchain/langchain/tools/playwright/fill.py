@@ -5,7 +5,7 @@ from typing import Type
 from pydantic import BaseModel, Field
 
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_to_fail_file
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_fail_to_file
 
 
 class FillToolInput(BaseModel):
@@ -67,6 +67,6 @@ class FillTool(BaseBrowserTool):
             await page.locator(selector).fill(text, timeout=self.playwright_timeout)
             await awrite_to_file(msg=f'    {playwright_cmd}')
         except Exception as e:
-            await awrite_to_fail_file(msg=playwright_cmd, page=page)
+            await awrite_fail_to_file(msg=playwright_cmd, page=page)
             return f"Unable to fill up text on element '{selector}' with exception: {e}"
         return f"Text input on the element by text, {selector} ,was successfully performed"

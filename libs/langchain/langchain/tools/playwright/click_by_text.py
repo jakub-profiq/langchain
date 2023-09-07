@@ -6,7 +6,7 @@ from typing import Type
 from pydantic import BaseModel, Field
 
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_to_fail_file
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_fail_to_file
 
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 
@@ -109,6 +109,6 @@ class ClickByTextTool(BaseBrowserTool):
                 await page.click(f"{selector}:has-text('{text}')", strict=False, timeout=self.playwright_timeout)
                 await awrite_to_file(msg=f'    {playwright_cmd}')
             except PlaywrightTimeoutError as e2:
-                await awrite_to_fail_file(msg=playwright_cmd, page=page)
+                await awrite_fail_to_file(msg=playwright_cmd, page=page)
                 return f"Unable to click on element with selector: '{selector}' text:'{text}'with exception: {e2}"
         return f"Click on the element with selector: '{selector}' text: '{text}', was successfully performed"

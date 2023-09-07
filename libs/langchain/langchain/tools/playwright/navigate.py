@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, CallbackManagerForToolRun
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_to_fail_file
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_fail_to_file
 
 
 class NavigateToolInput(BaseModel):
@@ -57,6 +57,6 @@ class NavigateTool(BaseBrowserTool):
             status = response.status if response else "unknown"
             await awrite_to_file(msg=f'    {playwright_cmd}')
         except Exception as e:
-            await awrite_to_fail_file(msg=playwright_cmd, page=page)
+            await awrite_fail_to_file(msg=playwright_cmd, page=page)
             return f"Unable to navigate to {url}"
         return f"Navigating to {url} returned status code {status}"
