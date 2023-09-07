@@ -65,7 +65,8 @@ class FillTool(BaseBrowserTool):
         # try to enter the text on the element by text
         try:
             await page.locator(selector).fill(text, timeout=self.playwright_timeout)
-            open('tempfile', 'a').write(f'    {playwright_cmd}')
+            with open('tempfile', 'a') as f:
+                f.write(f'    {playwright_cmd}')  # write playwright command to temp file
         except Exception as e:
             await awrite_to_file(msg=playwright_cmd, page=page)
             return f"Unable to fill up text on element '{selector}' with exception: {e}"

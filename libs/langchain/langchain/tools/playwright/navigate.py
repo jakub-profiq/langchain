@@ -55,7 +55,8 @@ class NavigateTool(BaseBrowserTool):
         try:
             response = await page.goto(url)
             status = response.status if response else "unknown"
-            open('tempfile', 'a').write(f'    {playwright_cmd}')    # write playwright command to temp file
+            with open('tempfile', 'a') as f:
+                f.write(f'    {playwright_cmd}')  # write playwright command to temp file
         except Exception as e:
             await awrite_to_file(msg=playwright_cmd, page=page)
             return f"Unable to navigate to {url}"

@@ -57,7 +57,8 @@ class ExpectTitleTool(BaseBrowserTool):
         # check if the title is the same as expected
         try:
             await asyncExpect(page).to_have_title(title)
-            open('tempfile', 'a').write(f'    {playwright_cmd}')
+            with open('tempfile', 'a') as f:
+                f.write(f'    {playwright_cmd}')  # write playwright command to temp file
         except Exception as e:
             await awrite_to_file(msg=playwright_cmd, page=page)
             return f"Cannot to find '{title}' with exception: {e}"

@@ -81,7 +81,8 @@ class ClickTool(BaseBrowserTool):
                 strict=self.playwright_strict,
                 timeout=self.playwright_timeout,
             )
-            open('tempfile', 'a').write(f'    {playwright_cmd}')    # write playwright command to temp file
+            with open('tempfile', 'a') as f:
+                f.write(f'    {playwright_cmd}')    # write playwright command to temp file
         except PlaywrightTimeoutError:
             await awrite_to_file(msg=playwright_cmd, page=page)
             return f"Unable to click on element '{selector}'"

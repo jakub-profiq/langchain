@@ -59,7 +59,8 @@ class IframeExpectHiddenTool(BaseBrowserTool):
         # check if the text is the same as expected
         try:
             await asyncExpect(page.frame_locator(iframe).last.locator(selector)).to_be_hidden()
-            open('tempfile', 'a').write(f'    {playwright_cmd}')
+            with open('tempfile', 'a') as f:
+                f.write(f'    {playwright_cmd}')  # write playwright command to temp file
         except Exception as e:
             await awrite_to_file(msg=playwright_cmd, page=page)
             return f"Cannot to find iframe '{iframe}' with selector '{selector}' with exception: {e}"

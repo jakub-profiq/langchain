@@ -61,7 +61,8 @@ class ExpectTextTool(BaseBrowserTool):
         try:
             element = page.get_by_text(text).nth(index)
             await async_expect(element).to_have_text(text)
-            open('tempfile', 'a').write(f"    {playwright_cmd}")
+            with open('tempfile', 'a') as f:
+                f.write(f'    {playwright_cmd}')  # write playwright command to temp file
         except Exception as e:
             await awrite_to_file(msg=playwright_cmd, page=page)
             return f"Cannot to find '{text}' with exception: {e}"

@@ -68,7 +68,8 @@ class IframeClickByTextTool(BaseBrowserTool):
 
         try:
             await page.frame_locator(iframe).last.get_by_text(text).click()
-            open('tempfile', 'a').write(f'    {playwright_cmd}')    # write playwright command to temp file
+            with open('tempfile', 'a') as f:
+                f.write(f'    {playwright_cmd}')    # write playwright command to temp file
         except PlaywrightTimeoutError:
             await awrite_to_file(msg=playwright_cmd, page=page)
             return f"Unable to click on element '{text}'"

@@ -55,7 +55,8 @@ class TakeScreenshotTool(BaseBrowserTool):
 
         try:
             await page.screenshot(path=path, full_page=full)
-            open('tempfile', 'a').write(f'    {playwright_cmd}')    # write playwright command to temp file
+            with open('tempfile', 'a') as f:
+                f.write(f'    {playwright_cmd}')    # write playwright command to temp file
         except Exception as e:
             await awrite_to_file(msg=playwright_cmd, page=page)
             return f"Unable to take screenshot with exception: {e}"
