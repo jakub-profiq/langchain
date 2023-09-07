@@ -115,4 +115,4 @@ async def awrite_to_file(msg: str) -> None:
 
 
 async def awrite_fail_to_file(msg: str, page: any) -> None:
-    await awrite_to_file(msg=f'    // FAIL - {msg}    // FAIL - {await ascreenshot_page(page)} \n')
+    await awrite_to_file(msg=f'    // FAIL - {msg}    //        {await ascreenshot_page(page)} \n')

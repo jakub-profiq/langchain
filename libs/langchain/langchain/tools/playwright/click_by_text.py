@@ -92,16 +92,14 @@ class ClickByTextTool(BaseBrowserTool):
             if await el.is_visible():
                 await el.click(timeout=self.playwright_timeout)
                 # write playwright command to temp file
-                playwright_cmd = f"    await page.getByRole('{selector}').getByText('{text}').click({{timeout: {self.playwright_timeout}}});\n"
-                with open('tempfile', 'a') as f:
-                    f.write(playwright_cmd)
+                playwright_cmd = f"await page.getByRole('{selector}').getByText('{text}').click({{timeout: {self.playwright_timeout}}});\n"
+                await awrite_to_file(msg=f'    {playwright_cmd}')
             else:
                 # if not visible, try to click on element only by text
                 await page.get_by_text(text).click(timeout=self.playwright_timeout)
                 # write playwright command to temp file
-                playwright_cmd = f"    await page.getByText('{text}').click({{timeout: {self.playwright_timeout}}});\n"
-                with open('tempfile', 'a') as f:
-                    f.write(playwright_cmd)
+                playwright_cmd = f"await page.getByText('{text}').click({{timeout: {self.playwright_timeout}}});\n"
+                await awrite_to_file(msg=f'    {playwright_cmd}')
         except Exception as e:
             playwright_cmd = f"await page.click(\"{selector}:has-text('{text}')\", {{timeout:{self.playwright_timeout}}});\n"
             try:
