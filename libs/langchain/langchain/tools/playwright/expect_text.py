@@ -66,7 +66,7 @@ class ExpectTextTool(BaseBrowserTool):
                 f.write(playwrite_command)
         except Exception as e:
             with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n")
+                f.write(f"    // FAIL - await expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n")
             return f"Cannot to find '{text}' with exception: {e}"
 
         return "Text: ", text, "is visible on the current page."

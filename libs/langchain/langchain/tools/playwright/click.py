@@ -20,6 +20,7 @@ class ClickToolInput(BaseModel):
     """Input for ClickTool."""
 
     selector: str = Field(..., description="CSS selector for the element to click")
+    index: int = Field(0, description="Index of the element to click")
 
 
 class ClickTool(BaseBrowserTool):
@@ -36,21 +37,22 @@ class ClickTool(BaseBrowserTool):
     playwright_timeout: float = 3_000
     """Timeout (in ms) for Playwright to wait for element to be ready."""
 
-    def _selector_effective(self, selector: str) -> str:
+    def _selector_effective(self, selector: str, index: int) -> str:
         if not self.visible_only:
             return selector
-        return f"{selector} >> visible=1"
+        return f"{selector} >> visible=1 >> nth={index}"
 
     def _run(
         self,
         selector: str,
+        index: int = 0,
     ) -> str:
         """Use the tool."""
         if self.sync_browser is None:
             raise ValueError(f"Synchronous browser not provided to {self.name}")
         page = get_current_page(self.sync_browser)
         # Navigate to the desired webpage before using this tool
-        selector_effective = self._selector_effective(selector=selector)
+        selector_effective = self._selector_effective(selector=selector, index=index)
 
         try:
             page.click(
@@ -71,13 +73,14 @@ class ClickTool(BaseBrowserTool):
     async def _arun(
         self,
         selector: str,
+        index: int = 0,
     ) -> str:
         """Use the tool."""
         if self.async_browser is None:
             raise ValueError(f"Asynchronous browser not provided to {self.name}")
         page = await aget_current_page(self.async_browser)
         # Navigate to the desired webpage before using this tool
-        selector_effective = self._selector_effective(selector=selector)
+        selector_effective = self._selector_effective(selector=selector, index=index)
 
         try:
             await page.click(

@@ -18,7 +18,7 @@ class ClickByTextToolInput(BaseModel):
 
 
 class ClickByTextTool(BaseBrowserTool):
-    """Tool for clicking on an element with the given text and selector, if it's possible."""
+    """Tool for clicking on an element with the given text and selector."""
 
     name: str = "click_by_text"
     description: str = "Click on element in the current web page matching the text content"
@@ -112,5 +112,5 @@ class ClickByTextTool(BaseBrowserTool):
             except PlaywrightTimeoutError as e2:
                 with open('tempfile', 'a') as f:
                     f.write(f"    // FAIL - click_by_text: selector - '{selector} ; text: '{text}'\n")
-                return f"Unable to click on element with selector: '{selector}' text:'{text}'with exception: {e2}"
+                return f"Unable to click on element with selector: '{selector}' text:'{text}'"
         return (f"Click on the element with selector: '{selector}' text: '{text}', was successfully performed")
