@@ -104,12 +104,15 @@ def run_async(coro: Coroutine[Any, Any, T]) -> T:
 async def ascreenshot_page(page: any) -> str:
     with open('lang_conf.json', 'r') as lang_conf:
         prod_name = str(json.load(lang_conf)['product']).replace("'", "")
-    # prod_name = str(json.load(open('lang_conf.json', 'r'))['product']).replace("'", "")
         scr_path = os.path.join(os.path.curdir, f"screenshot/{prod_name}/fail-{prod_name}-{str(datetime.datetime.now()).replace(' ', '-')}.png")
         await page.screenshot(path=scr_path, full_page=False)
         return scr_path
 
 
-async def awrite_to_file(msg: str, page: any) -> None:
+async def awrite_to_file(msg: str) -> None:
     with open('tempfile', 'a') as f:
-        f.write(f'    // FAIL - {msg}    // FAIL - {await ascreenshot_page(page)} \n')
+        f.write(msg)
+
+
+async def awrite_fail_to_file(msg: str, page: any) -> None:
+    await awrite_to_file(msg=f'    // FAIL - {msg}    // FAIL - {await ascreenshot_page(page)} \n')

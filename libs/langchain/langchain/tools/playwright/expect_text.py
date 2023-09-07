@@ -5,7 +5,7 @@ from typing import Type
 from pydantic import BaseModel, Field
 
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_to_fail_file
 from playwright.sync_api import expect as sync_expect
 from playwright.async_api import expect as async_expect
 
@@ -61,9 +61,8 @@ class ExpectTextTool(BaseBrowserTool):
         try:
             element = page.get_by_text(text).nth(index)
             await async_expect(element).to_have_text(text)
-            with open('tempfile', 'a') as f:
-                f.write(f'    {playwright_cmd}')  # write playwright command to temp file
+            await awrite_to_file(msg=f'    {playwright_cmd}')
         except Exception as e:
-            await awrite_to_file(msg=playwright_cmd, page=page)
+            await awrite_to_fail_file(msg=playwright_cmd, page=page)
             return f"Cannot to find '{text}' with exception: {e}"
         return f"Text: , {text}, is visible on the current page."

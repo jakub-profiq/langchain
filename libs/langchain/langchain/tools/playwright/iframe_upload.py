@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, CallbackManagerForToolRun
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_to_fail_file
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 
@@ -68,9 +68,8 @@ class IframeUploadTool(BaseBrowserTool):
 
         try:
             await page.frame_locator(iframe).last.locator("input[type=file]").set_input_files(path)
-            with open('tempfile', 'a') as f:
-                f.write(f'    {playwright_cmd}')  # write playwright command to temp file
+            await awrite_to_file(msg=f'    {playwright_cmd}')
         except PlaywrightTimeoutError:
-            await awrite_to_file(msg=playwright_cmd, page=page)
+            await awrite_to_fail_file(msg=playwright_cmd, page=page)
             return f"Unable to upload files '{path}' in iframe"
         return f"Uploaded files '{path}'"

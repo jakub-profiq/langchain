@@ -6,7 +6,7 @@ from typing import Type
 from pydantic import BaseModel, Field
 
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_to_fail_file
 
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
 
@@ -107,9 +107,8 @@ class ClickByTextTool(BaseBrowserTool):
             try:
                 # if there are more than one element with the same text, click on the first one
                 await page.click(f"{selector}:has-text('{text}')", strict=False, timeout=self.playwright_timeout)
-                with open('tempfile', 'a') as f:
-                    f.write(f'    {playwright_cmd}')  # write playwright command to temp file
+                await awrite_to_file(msg=f'    {playwright_cmd}')
             except PlaywrightTimeoutError as e2:
-                await awrite_to_file(msg=playwright_cmd, page=page)
+                await awrite_to_fail_file(msg=playwright_cmd, page=page)
                 return f"Unable to click on element with selector: '{selector}' text:'{text}'with exception: {e2}"
         return f"Click on the element with selector: '{selector}' text: '{text}', was successfully performed"
