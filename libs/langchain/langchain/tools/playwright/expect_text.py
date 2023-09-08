@@ -56,7 +56,7 @@ class ExpectTextTool(BaseBrowserTool):
         if self.async_browser is None:
             raise ValueError(f"Asynchronous browser not provided to {self.name}")
         page = await aget_current_page(self.async_browser)
-        playwright_cmd = "await expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n"
+        playwright_cmd = f"await expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n"
         # check if the text is the same as expected
         try:
             element = page.get_by_text(text).nth(index)
