@@ -6,9 +6,10 @@ from typing import Type
 from pydantic import BaseModel, Field
 
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import aget_current_page, get_current_page
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_fail_to_file
 
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
+
 
 class ClickByTextToolInput(BaseModel):
     """Input for ClickByTextTool."""
@@ -91,26 +92,21 @@ class ClickByTextTool(BaseBrowserTool):
             if await el.is_visible():
                 await el.click(timeout=self.playwright_timeout)
                 # write playwright command to temp file
-                playwright_cmd = f"    await page.getByRole('{selector}').getByText('{text}').click({{timeout: {self.playwright_timeout}}});\n"
-                with open('tempfile', 'a') as f:
-                    f.write(playwright_cmd)
+                playwright_cmd = f"await page.getByRole('{selector}').getByText('{text}').click({{timeout: {self.playwright_timeout}}});\n"
+                await awrite_to_file(msg=f'    {playwright_cmd}')
             else:
                 # if not visible, try to click on element only by text
                 await page.get_by_text(text).click(timeout=self.playwright_timeout)
                 # write playwright command to temp file
-                playwright_cmd = f"    await page.getByText('{text}').click({{timeout: {self.playwright_timeout}}});\n"
-                with open('tempfile', 'a') as f:
-                    f.write(playwright_cmd)
+                playwright_cmd = f"await page.getByText('{text}').click({{timeout: {self.playwright_timeout}}});\n"
+                await awrite_to_file(msg=f'    {playwright_cmd}')
         except Exception as e:
+            playwright_cmd = f"await page.click(\"{selector}:has-text('{text}')\", {{timeout:{self.playwright_timeout}}});\n"
             try:
                 # if there are more than one element with the same text, click on the first one
                 await page.click(f"{selector}:has-text('{text}')", strict=False, timeout=self.playwright_timeout)
-                # write playwright command to temp file
-                playwright_cmd = f"    await page.click(\"{selector}:has-text('{text}')\", {{timeout:{self.playwright_timeout}}});\n"
-                with open('tempfile', 'a') as f:
-                    f.write(playwright_cmd)
+                await awrite_to_file(msg=f'    {playwright_cmd}')
             except PlaywrightTimeoutError as e2:
-                with open('tempfile', 'a') as f:
-                    f.write(f"    // FAIL - click_by_text: selector - '{selector} ; text: '{text}'\n")
+                await awrite_fail_to_file(msg=playwright_cmd, page=page)
                 return f"Unable to click on element with selector: '{selector}' text:'{text}'with exception: {e2}"
-        return (f"Click on the element with selector: '{selector}' text: '{text}', was successfully performed")
+        return f"Click on the element with selector: '{selector}' text: '{text}', was successfully performed"

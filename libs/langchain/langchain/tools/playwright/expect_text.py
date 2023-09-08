@@ -5,10 +5,9 @@ from typing import Type
 from pydantic import BaseModel, Field
 
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import aget_current_page, get_current_page
-from langchain.tools.playwright.utils import aget_current_page, get_current_page
-from playwright.sync_api import expect as syncExpect
-from playwright.async_api import expect as asyncExpect
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_fail_to_file
+from playwright.sync_api import expect as sync_expect
+from playwright.async_api import expect as async_expect
 
 
 class ExpectTextToolInput(BaseModel):
@@ -37,10 +36,10 @@ class ExpectTextTool(BaseBrowserTool):
         # check if the text is the same as expected
         try:
             element = page.get_by_text(text).nth(index);
-            syncExpect(element).to_have_text(text)
-            playwrite_command = f"    expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n"
+            sync_expect(element).to_have_text(text)
+            playwright_cmd = f"    expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n"
             with open('tempfile', 'a') as f:
-                f.write(playwrite_command)
+                f.write(playwright_cmd)
         except Exception as e:
             with open('tempfile', 'a') as f:
                 f.write(f"    // FAIL - expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n")
@@ -57,16 +56,13 @@ class ExpectTextTool(BaseBrowserTool):
         if self.async_browser is None:
             raise ValueError(f"Asynchronous browser not provided to {self.name}")
         page = await aget_current_page(self.async_browser)
+        playwright_cmd = f"await expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n"
         # check if the text is the same as expected
         try:
-            element = page.get_by_text(text).nth(index);
-            await asyncExpect(element).to_have_text(text)
-            playwrite_command = f"    await expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n"
-            with open('tempfile', 'a') as f:
-                f.write(playwrite_command)
+            element = page.get_by_text(text).nth(index)
+            await async_expect(element).to_have_text(text)
+            await awrite_to_file(msg=f'    {playwright_cmd}')
         except Exception as e:
-            with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n")
+            await awrite_fail_to_file(msg=playwright_cmd, page=page)
             return f"Cannot to find '{text}' with exception: {e}"
-
-        return "Text: ", text, "is visible on the current page."
+        return f"Text: , {text}, is visible on the current page."

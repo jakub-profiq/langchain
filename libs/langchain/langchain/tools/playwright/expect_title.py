@@ -5,7 +5,7 @@ from typing import Type
 from pydantic import BaseModel, Field
 
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import aget_current_page, get_current_page
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_fail_to_file
 from playwright.sync_api import expect as syncExpect
 from playwright.async_api import expect as asyncExpect
 
@@ -53,15 +53,12 @@ class ExpectTitleTool(BaseBrowserTool):
         if self.async_browser is None:
             raise ValueError(f"Asynchronous browser not provided to {self.name}")
         page = await aget_current_page(self.async_browser)
+        playwright_cmd = f"await expect(page).toHaveTitle(/{title}/);\n"
         # check if the title is the same as expected
         try:
             await asyncExpect(page).to_have_title(title)
-            playwrite_command = f"    await expect(page).toHaveTitle(/{title}/);\n"
-            with open('tempfile', 'a') as f:
-                f.write(playwrite_command)
+            await awrite_to_file(msg=f'    {playwright_cmd}')
         except Exception as e:
-            with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - expect().toHaveTitle('{title})\n")
+            await awrite_fail_to_file(msg=playwright_cmd, page=page)
             return f"Cannot to find '{title}' with exception: {e}"
-
-        return "Title: ", title ,"is visible on the current page."
+        return f"Title: , {title} ,is visible on the current page."

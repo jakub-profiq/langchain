@@ -4,17 +4,12 @@ from typing import Optional, Type
 
 from pydantic import BaseModel, Field
 
-from langchain.callbacks.manager import (
-    AsyncCallbackManagerForToolRun,
-    CallbackManagerForToolRun,
-)
+from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, CallbackManagerForToolRun
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import (
-    aget_current_page,
-    get_current_page,
-)
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_fail_to_file
 
 from playwright.async_api import TimeoutError as PlaywrightTimeoutError
+
 
 class ClickToolInput(BaseModel):
     """Input for ClickTool."""
@@ -78,6 +73,7 @@ class ClickTool(BaseBrowserTool):
         page = await aget_current_page(self.async_browser)
         # Navigate to the desired webpage before using this tool
         selector_effective = self._selector_effective(selector=selector)
+        playwright_cmd = f"await page.click(\"{selector} >> visible = true\", {{ strict:{str(self.playwright_strict).lower()}, timeout:{self.playwright_timeout}}});\n"
 
         try:
             await page.click(
@@ -85,12 +81,8 @@ class ClickTool(BaseBrowserTool):
                 strict=self.playwright_strict,
                 timeout=self.playwright_timeout,
             )
-            # write playwright command to temp file
-            playwright_cmd = f"    await page.click(\"{selector} >> visible = true\", {{ strict:{str(self.playwright_strict).lower()}, timeout:{self.playwright_timeout}}});\n"
-            with open('tempfile', 'a') as f:
-                f.write(playwright_cmd)
+            await awrite_to_file(msg=f'    {playwright_cmd}')
         except PlaywrightTimeoutError:
-            with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL await page.click(\"{selector} >> visible = true\", {{ strict:{str(self.playwright_strict).lower()}, timeout:{self.playwright_timeout}}});\n")
+            await awrite_fail_to_file(msg=playwright_cmd, page=page)
             return f"Unable to click on element '{selector}'"
         return f"Clicked element '{selector}'"

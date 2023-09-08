@@ -4,16 +4,11 @@ from typing import Optional, Type
 
 from pydantic import BaseModel, Field
 
-from langchain.callbacks.manager import (
-    AsyncCallbackManagerForToolRun,
-    CallbackManagerForToolRun,
-)
+from langchain.callbacks.manager import AsyncCallbackManagerForToolRun, CallbackManagerForToolRun
 from langchain.tools.playwright.base import BaseBrowserTool
-from langchain.tools.playwright.utils import (
-    aget_current_page,
-    get_current_page,
-)
+from langchain.tools.playwright.utils import aget_current_page, get_current_page, awrite_to_file, awrite_fail_to_file
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+
 
 class IframeClickToolInput(BaseModel):
     """Input for IframeClickByTextTool."""
@@ -35,7 +30,6 @@ class IframeClickTool(BaseBrowserTool):
     """Whether to employ Playwright's strict mode when clicking on elements."""
     playwright_timeout: float = 1_000
     """Timeout (in ms) for Playwright to wait for element to be ready."""
-
 
     def _run(
         self,
@@ -70,15 +64,12 @@ class IframeClickTool(BaseBrowserTool):
             raise ValueError(f"Asynchronous browser not provided to {self.name}")
         # Navigate to the desired webpage before using this tool
         page = await aget_current_page(self.async_browser)
+        playwright_cmd = f"await page.frameLocator(\"{iframe}\").last().locator(\"{selector}\").click();\n"
 
         try:
             await page.frame_locator(iframe).last.locator(selector).click()
-            # write playwright command to temp file
-            playwright_cmd = f"    await page.frameLocator(\"{iframe}\").last().locator(\"{selector}\").click();\n"
-            with open('tempfile', 'a') as f:
-                f.write(playwright_cmd)
+            await awrite_to_file(msg=f'    {playwright_cmd}')
         except PlaywrightTimeoutError:
-            with open('tempfile', 'a') as f:
-                f.write(f"    // FAIL - await page.frameLocator(\"{iframe}\").last().locator(\"{selector}\").click();)\n")
+            await awrite_fail_to_file(msg=playwright_cmd, page=page)
             return f"Unable to click on element '{selector}'"
         return f"Clicked element '{selector}'"
