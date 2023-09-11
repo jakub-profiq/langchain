@@ -16,10 +16,11 @@ class ClickByTextToolInput(BaseModel):
 
     selector: str = Field(..., description="Selector for the element by text content.")
     text: str = Field(..., description="Text content of the element to click on.")
+    index: int = Field(0, description="Index of the element to click on.")
 
 
 class ClickByTextTool(BaseBrowserTool):
-    """Tool for clicking on an element with the given text and selector, if it's possible."""
+    """Tool for clicking on an element with the given text and selector."""
 
     name: str = "click_by_text"
     description: str = "Click on element in the current web page matching the text content"
@@ -78,19 +79,20 @@ class ClickByTextTool(BaseBrowserTool):
         self,
         selector: str,
         text: str,
+        index: int = 0,
     ) -> str:
         """Use the tool."""
         if self.async_browser is None:
             raise ValueError(f"Asynchronous browser not provided to {self.name}")
-        # Navigate to the desired webpage before using this tool
-        page = await aget_current_page(self.async_browser)
-        playwright_cmd = None
 
         try:
+            # Navigate to the desired webpage before using this tool
+            page = await aget_current_page(self.async_browser)
+            playwright_cmd = None
             el = page.get_by_role(selector).get_by_text(text)
             # check if element is visible via selector and text
-            if await el.is_visible():
-                await el.click(timeout=self.playwright_timeout)
+            if await el.nth(index).is_visible():
+                await el.nth(index).click(timeout=self.playwright_timeout)
                 # write playwright command to temp file
                 playwright_cmd = f"await page.getByRole('{selector}').getByText('{text}').click({{timeout: {self.playwright_timeout}}});\n"
                 await awrite_to_file(msg=f'    {playwright_cmd}')
@@ -101,12 +103,5 @@ class ClickByTextTool(BaseBrowserTool):
                 playwright_cmd = f"await page.getByText('{text}').click({{timeout: {self.playwright_timeout}}});\n"
                 await awrite_to_file(msg=f'    {playwright_cmd}')
         except Exception as e:
-            playwright_cmd = f"await page.click(\"{selector}:has-text('{text}')\", {{timeout:{self.playwright_timeout}}});\n"
-            try:
-                # if there are more than one element with the same text, click on the first one
-                await page.click(f"{selector}:has-text('{text}')", strict=False, timeout=self.playwright_timeout)
-                await awrite_to_file(msg=f'    {playwright_cmd}')
-            except PlaywrightTimeoutError as e2:
-                await awrite_fail_to_file(msg=playwright_cmd, page=page)
-                return f"Unable to click on element with selector: '{selector}' text:'{text}'with exception: {e2}"
-        return f"Click on the element with selector: '{selector}' text: '{text}', was successfully performed"
+                return f"Unable to click on element with selector: '{selector}', index: '{index}' text:'{text}'"
+        return f"Click on the element with selector: '{selector}', index: '{index}' text: '{text}', was successfully performed"
