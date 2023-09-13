@@ -35,7 +35,7 @@ class ExpectTextTool(BaseBrowserTool):
         page = get_current_page(self.sync_browser)
         # check if the text is the same as expected
         try:
-            element = page.get_by_text(text).nth(index);
+            element = page.get_by_text(text).nth(index)
             sync_expect(element).to_have_text(text)
             playwright_cmd = f"    expect(page.getByText(/{text}/).nth({index})).toHaveText(/{text}/);\n"
             with open('tempfile', 'a') as f:
