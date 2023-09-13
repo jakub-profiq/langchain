@@ -31,8 +31,6 @@ class ClickByTextTool(BaseBrowserTool):
     """Whether to consider only visible elements."""
     playwright_strict: bool = False
     """Whether to employ Playwright's strict mode when clicking on elements."""
-    playwright_timeout: float = 3_000
-    """Timeout (in ms) for Playwright to wait for element to be ready."""
 
     def _selector_effective(self, selector: str, index: int) -> str:
         if not self.visible_only:
@@ -43,7 +41,7 @@ class ClickByTextTool(BaseBrowserTool):
         self,
         selector: str,
         text: str,
-        timeout: float = playwright_timeout
+        timeout: float = 3_000
     ) -> str:
         """Use the tool."""
         if self.sync_browser is None:
@@ -56,14 +54,14 @@ class ClickByTextTool(BaseBrowserTool):
             el = page.get_by_role(selector).get_by_text(text)
             # check if element is visible via selector and text
             if el.is_visible():
-                el.click(timeout=self.playwright_timeout)
+                el.click(timeout=self.timeout)
                 # write playwright command to temp file
                 playwright_cmd = f"    page.getByRole('{selector}').getByText('{text}').click({{timeout: {timeout}}});\n"
                 with open('tempfile', 'a') as f:
                     f.write(playwright_cmd)
             else:
                 # if not visible, try to click on element only by text
-                page.get_by_text(text).click(timeout=self.playwright_timeout)
+                page.get_by_text(text).click(timeout=self.timeout)
                 # write playwright command to temp file
                 playwright_cmd = f"    page.getByText('{text}').click({{timeout: {timeout}}});\n"
                 with open('tempfile', 'a') as f:
@@ -71,7 +69,7 @@ class ClickByTextTool(BaseBrowserTool):
         except Exception as e:
             try:
                 # if there are more than one element with the same text, click on the first one
-                page.click(f"{selector}:has-text('{text}')", strict=False, timeout=self.playwright_timeout)
+                page.click(f"{selector}:has-text('{text}')", strict=False, timeout=self.timeout)
                 # write playwright command to temp file
                 playwright_cmd = f"    page.click(\"{selector}:has-text('{text}'), {{timeout:{timeout}}}\");\n"
                 with open('tempfile', 'a') as f:
@@ -87,7 +85,7 @@ class ClickByTextTool(BaseBrowserTool):
         selector: str,
         text: str,
         index: int = 0,
-        timeout: float = playwright_timeout
+        timeout: float = 3_000
 
     ) -> str:
         """Use the tool."""
