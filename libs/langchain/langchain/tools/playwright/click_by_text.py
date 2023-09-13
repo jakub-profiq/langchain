@@ -108,9 +108,10 @@ class ClickByTextTool(BaseBrowserTool):
                 await awrite_to_file(msg=f'    {playwright_cmd}')
             else:
                 # if not visible, try to click on element only by text
+                text_effective = self._selector_effective(selector=text, index=index)
                 await page.get_by_text(text).click(timeout=timeout)
                 # write playwright command to temp file
-                playwright_cmd = f"await page.getByText('{text}').click({{strict:{str(self.playwright_strict).lower()}, timeout:{timeout}}});\n"
+                playwright_cmd = f"await page.getByText('{text_effective}').click({{strict:{str(self.playwright_strict).lower()}, timeout:{timeout}}});\n"
                 await awrite_to_file(msg=f'    {playwright_cmd}')
         except Exception:
                 return f"Unable to click on element with selector: '{selector}', index: '{index}' text:'{text}'"
