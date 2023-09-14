@@ -17,7 +17,7 @@ class ClickByTextToolInput(BaseModel):
     selector: str = Field(..., description="Selector for the element by text content.")
     text: str = Field(..., description="Text content of the element to click on.")
     index: int = Field(0, description="Index of the element to click on.")
-    timeout: float = Field(3_000, description="Timeout (in ms) for Playwright to wait for element to be ready.")
+    timeout: float = Field(5_000, description="Timeout (in ms) for Playwright to wait for element to be ready.")
 
 
 class ClickByTextTool(BaseBrowserTool):
@@ -46,7 +46,7 @@ class ClickByTextTool(BaseBrowserTool):
         self,
         selector: str,
         text: str,
-        timeout: float = 3_000
+        timeout: float = 5_000
     ) -> str:
         """Use the tool."""
         if self.sync_browser is None:
@@ -90,7 +90,7 @@ class ClickByTextTool(BaseBrowserTool):
         selector: str,
         text: str,
         index: int = 0,
-        timeout: float = 3_000
+        timeout: float = 5_000
 
     ) -> str:
         """Use the tool."""
@@ -107,14 +107,14 @@ class ClickByTextTool(BaseBrowserTool):
                 selector_effective = self._selector_effective(selector=selector, index=index, text=text)
                 await el.nth(index).click(timeout=timeout)
                 # write playwright command to temp file
-                playwright_cmd = f"await {selector_effective}.click({{strict:{str(self.playwright_strict).lower()}, timeout:{timeout}}});\n"
+                playwright_cmd = f"await {selector_effective}.click({{timeout:{timeout}}});\n"
                 await awrite_to_file(msg=f'    {playwright_cmd}')
             else:
                 # if not visible, try to click on element only by text
                 text_effective = self._text_effective(text=text, index=index)
                 await page.get_by_text(text).click(timeout=timeout)
                 # write playwright command to temp file
-                playwright_cmd = f"await {text_effective}.click({{strict:{str(self.playwright_strict).lower()}, timeout:{timeout}}});\n"
+                playwright_cmd = f"await {text_effective}.click({{timeout:{timeout}}});\n"
                 await awrite_to_file(msg=f'    {playwright_cmd}')
         except Exception:
                 return f"Unable to click on element with selector: '{selector}', index: '{index}' text:'{text}'"
