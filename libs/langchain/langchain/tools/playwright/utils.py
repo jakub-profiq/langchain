@@ -104,7 +104,7 @@ def run_async(coro: Coroutine[Any, Any, T]) -> T:
 async def ascreenshot_page(page: any) -> str:
     with open('lang_conf.json', 'r') as lang_conf:
         prod_name = str(json.load(lang_conf)['product']).replace("'", "")
-        scr_path = os.path.join(os.path.curdir, f"screenshot/{prod_name}/fail-{prod_name}-{str(datetime.datetime.now()).replace(' ', '-')}.png")
+        scr_path = os.path.join(os.path.curdir, f"screenshot/{prod_name}/failures/{str(datetime.datetime.now()).replace(' ', '-')}.png")
         await page.screenshot(path=scr_path, full_page=False)
         return scr_path
 
