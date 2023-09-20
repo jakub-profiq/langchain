@@ -65,6 +65,8 @@ from langchain.tools.playwright import (
     NavigateBackTool,
     NavigateTool,
     TakeScreenshotTool,
+    PressTool,
+    WaitTool,
 )
 from langchain.tools.plugin import AIPluginTool
 from langchain.tools.powerbi.tool import (
@@ -182,6 +184,7 @@ __all__ = [
     "OpenAPISpec",
     "OpenWeatherMapQueryRun",
     "PubmedQueryRun",
+    "PressTool",
     "PythonAstREPLTool",
     "PythonREPLTool",
     "QueryCheckerTool",
@@ -207,6 +210,7 @@ __all__ = [
     "Tool",
     "VectorStoreQATool",
     "VectorStoreQAWithSourcesTool",
+    "WaitTool",
     "WikipediaQueryRun",
     "WolframAlphaQueryRun",
     "WriteFileTool",

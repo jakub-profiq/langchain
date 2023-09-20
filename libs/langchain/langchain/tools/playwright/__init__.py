@@ -17,6 +17,8 @@ from langchain.tools.playwright.get_elements import GetElementsTool
 from langchain.tools.playwright.navigate import NavigateTool
 from langchain.tools.playwright.navigate_back import NavigateBackTool
 from langchain.tools.playwright.take_screenshot import TakeScreenshotTool
+from langchain.tools.playwright.press_key import PressTool
+from langchain.tools.playwright.wait_for_timeout import WaitTool
 
 __all__ = [
     "TakeScreenshotTool",
@@ -36,4 +38,6 @@ __all__ = [
     "ClickTool",
     "ClickByTextTool",
     "CurrentWebPageTool",
+    "PressTool",
+    "WaitTool",
 ]
